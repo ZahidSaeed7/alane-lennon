@@ -11,6 +11,9 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import CharacterList from '../../components/CharacterList/CharacterList';
 import { paginateResults } from '../../utils/pagination';
+import styles from './Home.module.css';
+import { useAppDispatch } from '../../common/hooks/useReduxHooks';
+import { setCharacters } from '../../common/reducers/characters.reducer';
 
 const HomePage: React.FC = () => {
 
@@ -55,31 +58,28 @@ const HomePage: React.FC = () => {
     setSearchParams(params);
   }, [currentPage, activeSearch, setSearchParams]);
 
-  if (loading) {
-    return (
-      <Container className="d-flex flex-column align-items-center justify-content-center" style={{ height: 200 }}>
-        <Spinner animation="border" role="status" variant="primary" style={{ width: 60, height: 60, marginBottom: 16 }}>
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-        <div style={{ fontSize: '1.2rem', color: '#0d6efd', fontWeight: 500 }}>Loading Characters</div>
-      </Container>
-    );
-  }
+  const dispatch = useAppDispatch();
 
-  if (error) {
-    return (
-      <Container className="d-flex flex-column align-items-center justify-content-center" style={{ height: 200 }}>
-        <Alert variant="danger">Error: {error.message}</Alert>
-      </Container>
-    );
-  }
+  useEffect(() => {
+    if (data && data.results) {
+      dispatch(setCharacters(data.results));
+    } else if (error) {
+      dispatch(setCharacters([]));
+    }
+  }, [data, error, dispatch]);
+
+  // Add this function to sanitize input
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = e.target.value.replace(/[^a-zA-Z0-9 ]/g, '');
+    setSearchTerm(sanitized);
+  };
 
   return (
     <Container className="py-3">
       <div className="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
-        <h3 className="mb-0 fw-bold">Characters list page</h3>
+        <h3 className={`${styles.title} mb-0 fw-bold`}>Characters list page</h3>
         {data && (
-          <span className="text-secondary">Total characters: {data.info.count}</span>
+          <span>Total characters: {data.info.count}</span>
         )}
       </div>
 
@@ -90,17 +90,33 @@ const HomePage: React.FC = () => {
             type="text"
             placeholder="Search characters by name..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleInputChange}
+            disabled={loading}
           />
-          <Button variant="primary" type="submit">
+          <Button variant="primary" type="submit" disabled={loading}>
             Search
           </Button>
         </InputGroup>
       </Form>
 
-      {(!data || !data.results?.length) ? (
+      {loading && (
+        <div className={styles.loadingContainer}>
+          <Spinner animation="border" role="status" variant="primary" className={styles.loadingSpinner}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <div className={styles.loadingText}>Loading Characters</div>
+        </div>
+      )}
+
+      {error && !data && (
+        <Alert variant="danger">Error: {error.message}</Alert>
+      )}
+
+      {(!data || !data.results?.length) && !error && !loading ? (
         <Alert variant="info" className="text-center my-4">No characters found.</Alert>
-      ) : (
+      ) : null}
+
+      {data && data.results?.length > 0 && !loading && (
         <>
           <CharacterList characters={data.results} />
 

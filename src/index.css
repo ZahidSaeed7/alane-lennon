@@ -1,0 +1,25 @@
+body {
+  padding-top: 70px;
+}
+
+.theme-light {
+  --title-color: #181a1b;
+  --text-color: #181a1b;
+  background-color: #f8f9fa;
+  color: #181a1b;
+}
+
+.theme-dark {
+  --title-color: #f8f9fa;
+  --text-color: #f8f9fa;
+  background-color: #181a1b;
+  color: #f8f9fa;
+}
+
+* {
+  color: inherit;
+}
+
+.darkBg {
+  background-color: #181a1b;
+}

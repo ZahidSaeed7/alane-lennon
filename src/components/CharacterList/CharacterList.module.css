@@ -1,0 +1,13 @@
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.cardHover {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.cardHoverActive {
+  transform: scale(1.02);
+} 
